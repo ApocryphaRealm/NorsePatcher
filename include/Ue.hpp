@@ -203,7 +203,13 @@ namespace nrn::ue
         if (!it) return false;
         UObject* cur = nullptr;
         std::memcpy(&cur, it, sizeof(cur)); // FUObjectItem::Object is its first member
-        return cur == o && !it->IsPendingKill() && !it->IsUnreachable();
+        if (cur != o || it->IsPendingKill() || it->IsUnreachable()) return false;
+        // Destroyed but not yet collected: UE5 marks it garbage in the object's own flags (UObjectBase +0x8,
+        // RF_MirroredGarbage 0x40000000). IsPendingKill above did not see it - a destroyed sky sphere still counted
+        // (NorseObjectSwap 0.1.0). Refinement 2026-11-18.
+        uint32_t flags = 0;
+        std::memcpy(&flags, reinterpret_cast<uint8_t*>(o) + 0x8, sizeof(flags));
+        return (flags & 0x40000000u) == 0;
     }
 
     struct Buf

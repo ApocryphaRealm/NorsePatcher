@@ -13,3 +13,6 @@
 ### Fixed (during the first test)
 - Callbacks are registered in `on_unreal_init`; registered in the constructor they were dropped silently.
 - Dumps print default values (empty arrays, False, 0) instead of `<unreadable>`.
+
+### Changed (2026-11-18, refinement)
+- Alive() also refuses an actor that is destroyed but not yet collected (RF_MirroredGarbage in its flags).
