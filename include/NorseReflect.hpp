@@ -573,5 +573,95 @@ namespace
         if (!Trim(cur).empty()) out.push_back(Trim(cur));
         return out;
     }
+
+    // ---- writes into game data that hold asset references (2026-11-18)
+    // A map change frees a loaded asset that only our write refers to - the root set did not keep it (NorseModelSwap
+    // 0.1.0 crashed on the dangling pointer). Each framework records what it wrote; at every map load, BEFORE its own
+    // pass (which exports the field first and would fault on a freed pointer), RecheckWrites re-imports a record whose
+    // asset paths are no longer loaded - ImportText of the path loads the asset again, and the old pointer is only
+    // overwritten, never read. A record whose owner was itself freed is dropped (the framework's pass applies the rule
+    // to the new owner).
+    struct WrittenRef
+    {
+        UObject* obj = nullptr;
+        int32_t idx = -1;
+        FProperty* prop = nullptr;
+        size_t offset = 0; // the field's place in the object (a list inside a struct is not at prop's own offset)
+        std::wstring text, label;
+        std::vector<std::wstring> paths;
+    };
+    inline std::vector<WrittenRef>& WrittenRefs()
+    {
+        static std::vector<WrittenRef> v;
+        return v;
+    }
+    // Every /Game/... or /Engine/... object path in an exported value (Class'/Game/X.Y', "/Game/X.Y", /Game/X.Y)
+    inline std::vector<std::wstring> AssetPathsIn(const std::wstring& t)
+    {
+        std::vector<std::wstring> out;
+        for (size_t p = 0; (p = t.find(L'/', p)) != std::wstring::npos;)
+        {
+            bool root = t.compare(p, 6, L"/Game/") == 0 || t.compare(p, 8, L"/Engine/") == 0;
+            if (!root || (p > 0 && (iswalnum(t[p - 1]) || t[p - 1] == L'_')))
+            {
+                ++p;
+                continue;
+            }
+            size_t e = t.find_first_of(L"'\",) ", p);
+            std::wstring path = t.substr(p, e == std::wstring::npos ? std::wstring::npos : e - p);
+            if (path.find(L'.') != std::wstring::npos && std::find(out.begin(), out.end(), path) == out.end()) out.push_back(path);
+            p = e == std::wstring::npos ? t.size() : e;
+        }
+        return out;
+    }
+    inline void RecordWrite(UObject* obj, FProperty* p, const void* addr, const std::wstring& text, const std::wstring& label)
+    {
+        auto paths = AssetPathsIn(text);
+        if (!obj || !p || paths.empty()) return;
+        auto& v = WrittenRefs();
+        for (auto& w : v)
+            if (w.obj == obj && w.prop == p && w.offset == size_t(reinterpret_cast<const uint8_t*>(addr) - reinterpret_cast<uint8_t*>(obj)))
+            {
+                w.text = text;
+                w.paths = paths;
+                w.idx = IndexOf(obj);
+                return;
+            }
+        v.push_back({obj, IndexOf(obj), p, size_t(reinterpret_cast<const uint8_t*>(addr) - reinterpret_cast<uint8_t*>(obj)), text, label, paths});
+    }
+    // Returns how many fields were re-imported
+    inline int RecheckWrites(const char* why)
+    {
+        int redone = 0, dropped = 0;
+        auto& v = WrittenRefs();
+        for (size_t i = 0; i < v.size();)
+        {
+            WrittenRef& w = v[i];
+            if (!Alive(w.obj, w.idx))
+            {
+                ++dropped;
+                v.erase(v.begin() + static_cast<std::ptrdiff_t>(i));
+                continue;
+            }
+            std::wstring gone;
+            for (const auto& p : w.paths)
+                if (!FindObj(p.c_str()))
+                {
+                    gone = p;
+                    break;
+                }
+            if (!gone.empty())
+            {
+                bool faulted = false;
+                const wchar_t* ok = SehImport(w.prop, w.text.c_str(), reinterpret_cast<uint8_t*>(w.obj) + w.offset, w.obj, &faulted);
+                ++redone;
+                NRN_INFO("%s: re-imported %s (%s was not loaded)%s", why, Narrow(w.label).c_str(), Narrow(ShortName(gone)).c_str(),
+                         (!ok || faulted) ? " - Unreal did not accept it" : "");
+            }
+            ++i;
+        }
+        if (redone || dropped) NRN_INFO("%s: %d written field(s) re-imported, %d dropped (owner gone), %zu kept", why, redone, dropped, v.size());
+        return redone;
+    }
 } // namespace
 } // namespace norse
