@@ -199,6 +199,7 @@ namespace
             ++st.failed;
             return;
         }
+        RecordWrite(owner, p, ptr, text, Widen(label)); // re-imported at a map load if its asset was freed (refinement)
         NRN_INFO("%s: %s -> %s (%s)", label.c_str(), Narrow(before).c_str(), Narrow(after).c_str(), e.where.c_str());
         ++st.ok;
     }
@@ -383,6 +384,7 @@ class NorsePatcher : public RC::CppUserModBase
                 try
                 {
                     for (const auto& d : g_cfg.Dumps) Dump(d, g_out);
+                    RecheckWrites("map load"); // before the pass, which exports first
                     if (g_cfg.ApplyOnMapLoad) ApplyAll("map load");
                 }
                 catch (...)

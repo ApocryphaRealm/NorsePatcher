@@ -16,3 +16,6 @@
 
 ### Changed (2026-11-18, refinement)
 - Alive() also refuses an actor that is destroyed but not yet collected (RF_MirroredGarbage in its flags).
+
+### Changed (2026-11-18, refinement)
+- Asset references it writes are recorded and re-imported at a map load if their asset is no longer loaded (soft references skipped).

@@ -618,6 +618,10 @@ namespace
     {
         auto paths = AssetPathsIn(text);
         if (!obj || !p || paths.empty()) return;
+        // A soft reference holds a path, not a pointer: nothing can dangle, and its asset is often not loaded, so a
+        // recheck would re-import it at every map load for nothing (NorsePatcher's ActorClass, refinement test d9ec)
+        std::wstring type = CppType(p);
+        if (type.find(L"TSoftObjectPtr") != std::wstring::npos || type.find(L"TSoftClassPtr") != std::wstring::npos) return;
         auto& v = WrittenRefs();
         for (auto& w : v)
             if (w.obj == obj && w.prop == p && w.offset == size_t(reinterpret_cast<const uint8_t*>(addr) - reinterpret_cast<uint8_t*>(obj)))
