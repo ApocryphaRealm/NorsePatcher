@@ -179,6 +179,33 @@ namespace nrn::ue
     };
 
     // ---- typed wrappers (UE 5.6 parameter layouts; LWC doubles) ----
+    // A UObject pointer kept across frames can outlive its object (destroyed, then freed by the garbage collector).
+    // Keep the object's InternalIndex (UObjectBase +0xC) beside it and ask the global object array before each use:
+    // the same object still in that slot, not marked for deletion, not unreachable. (NorseHUD 0.1.1, 2026-11-17)
+    inline int32_t IndexOf(UObject* o)
+    {
+        int32_t i = -1;
+        if (o) std::memcpy(&i, reinterpret_cast<uint8_t*>(o) + 0xC, sizeof(i));
+        return i;
+    }
+    inline bool Alive(UObject* o, int32_t index)
+    {
+        if (!o || index < 0) return false;
+        RC::Unreal::FUObjectItem* it = nullptr;
+        try
+        {
+            it = RC::Unreal::FUObjectArray::IndexToObject(index);
+        }
+        catch (...)
+        {
+            return false;
+        }
+        if (!it) return false;
+        UObject* cur = nullptr;
+        std::memcpy(&cur, it, sizeof(cur)); // FUObjectItem::Object is its first member
+        return cur == o && !it->IsPendingKill() && !it->IsUnreachable();
+    }
+
     struct Buf
     {
         alignas(16) uint8_t b[256]{};

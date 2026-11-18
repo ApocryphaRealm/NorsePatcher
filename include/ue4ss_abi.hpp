@@ -78,6 +78,7 @@ namespace RC
         class UFunction;
         class UEngine;
         class AGameModeBase;
+        class AActor;
         class FOutputDevice;
         class FProperty;
 
@@ -204,6 +205,18 @@ namespace RC
             NRN_UE4SS_IMPORT TObjectPtr<UScriptStruct>& GetStruct();
         };
 
+        // An object's slot in the global object array (NorseHUD 0.1.1: a unit destroyed between refreshes)
+        struct FUObjectItem
+        {
+            NRN_UE4SS_IMPORT bool IsPendingKill() const; // ?IsPendingKill@FUObjectItem@Unreal@RC@@QEBA_NXZ
+            NRN_UE4SS_IMPORT bool IsUnreachable() const; // ?IsUnreachable@FUObjectItem@Unreal@RC@@QEBA_NXZ
+        };
+        class FUObjectArray
+        {
+          public:
+            NRN_UE4SS_IMPORT static FUObjectItem* IndexToObject(int32_t Index); // ?IndexToObject@FUObjectArray@Unreal@RC@@SAPEAUFUObjectItem@23@H@Z
+        };
+
         class FMemory
         {
           public:
@@ -224,6 +237,9 @@ namespace RC
             NRN_UE4SS_IMPORT void RegisterInitGameStatePostCallback(std::function<void(AGameModeBase*)>);
             // NorseHUD: runs after every ProcessEvent, also for a Blueprint event nothing implements (ReceiveDrawHUD)
             NRN_UE4SS_IMPORT void RegisterProcessEventPostCallback(std::function<void(UObject*, UFunction*, void*)>);
+            // NorseEncounters: every actor's BeginPlay, streamed sub-levels included (a spawn point before it spawns)
+            NRN_UE4SS_IMPORT void RegisterBeginPlayPreCallback(std::function<void(AActor*)>);
+            NRN_UE4SS_IMPORT void RegisterBeginPlayPostCallback(std::function<void(AActor*)>);
         } // namespace Hook
     } // namespace Unreal
 } // namespace RC
