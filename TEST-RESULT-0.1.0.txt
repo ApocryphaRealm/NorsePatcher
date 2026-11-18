@@ -1,0 +1,8 @@
+Reason: NorsePatcher 0.1.0 dumps, patches and live-reloads data in game; patched enemy health reached the spawned units.
+Batch B-20261117-195513-3afe, 2026-11-17 19:55-20:03 (Main Agent). Three launches: the first found a bug, the third proved the fix.
+- Launch 1: callbacks registered in the mod constructor were dropped silently (UE4SS hooks exist only from on_unreal_init). Moved there.
+- Launch 2: 'on_unreal_init: registering...'; at the main menu's InitGameState three dumps written: DT_Stats (13 rows, row map checked against GetDataTableRowNames), Basic_Warrior (22 fields), BP_Metahuman_Unit_C default (191 fields).
+- Health is CombatUnit.Stats.Health.base (Basic_Warrior 5). np.reload with 'Stats = (Health=(base=40))': 5 -> 40, the struct's other fields kept (partial struct import).
+- CombatTestMap fight: Outcast_Nithing patched base 6 -> 40 then 50, Basic_Archer 5 -> 30; live units read RemainingHealth 30 and 23 (the game's own 75% scaling, same as the originals 6->5, 5->4). Map load re-applies: the asset had been reloaded from disk between menu and map.
+- Data table edit: EStat::Health.Icon and *.Icon (13 rows) changed; a later file's shared field is logged as winning; a missing row and a missing field warn with file:line.
+- Launch 3: ExportText with Delta = the value itself - 0 '<unreadable>' fields left (empty arrays, False, 0 now print).

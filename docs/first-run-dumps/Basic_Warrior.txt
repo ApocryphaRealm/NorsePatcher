@@ -1,0 +1,23 @@
+# NorsePatcher dump of CombatUnit /Game/Norse/Core/Data/CombatUnits/EnemyTypes/Basic/Basic_Warrior.Basic_Warrior
+Profiles = ("/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior01.Haukr_Warrior01","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior02.Haukr_Warrior02","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior03.Haukr_Warrior03","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior04.Haukr_Warrior04","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior05.Haukr_Warrior05","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior05.Haukr_Warrior05","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior06.Haukr_Warrior06","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior07.Haukr_Warrior07","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior08.Haukr_Warrior08","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior09.Haukr_Warrior09","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior10.Haukr_Warrior10","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Haukr/Haukr_Warrior11.Haukr_Warrior11","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior01.Steinarr_Warrior01","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior02.Steinarr_Warrior02","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior03.Steinarr_Warrior03","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior04.Steinarr_Warrior04","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior05.Steinarr_Warrior05","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior06.Steinarr_Warrior06","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior07.Steinarr_Warrior07","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior08.Steinarr_Warrior08","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior09.Steinarr_Warrior09","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior10.Steinarr_Warrior10","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior11.Steinarr_Warrior11","/Game/Norse/Core/Data/CharacterProfiles/Factions/Jarl_Steinarr/Steinarr_Warrior12.Steinarr_Warrior12","/Game/Norse/Core/Data/CharacterProfiles/Enemies/Warrior.Warrior")    ; TArray
+IdleAnimations = /Script/Norse.IdleAnimationSet'/Game/Norse/Core/Data/CombatUnits/IdleAnimSets/DefaultIdleAnimSet.DefaultIdleAnimSet'    ; UIdleAnimationSet*
+Archetype = /Game/Norse/Core/Data/CombatUnitArchetypes/Basic.Basic    ; TSoftObjectPtr<UCombatArchetype>
+Stats = (Health=(base=5,Percent=0),Armor=(base=0,Percent=0),Reflex=(base=20,Percent=0),Ability=(base=7,Percent=0),Movement=(base=0,Percent=0),Stability=(base=20,Percent=0),Range=(base=1,Percent=0),Skill=(base=80,Percent=0),Damage=(base=1,Percent=0),DamageRange=1,FinalDamagePercentage=100,FinalDamageMinimum=0,FinalHitPercentage=100,ArmorPiercing=(base=0,Percent=0),ArmorBreak=(base=1,Percent=0),CritChance=(base=10,Percent=0))    ; FUnitStat
+ActiveAbilities = ("/Game/Norse/Core/Data/Abilitites/Attack.Attack","/Game/Norse/Core/Data/Abilitites/DefensiveStance.DefensiveStance","/Game/Norse/Core/Data/Abilitites/Alert.Alert","/Game/Norse/Core/Data/Abilitites/UtilityItems/Tier1/Bandage_Enemy.Bandage_Enemy")    ; TArray
+PassiveAbilities =     ; TArray
+Traits =     ; TArray
+Name = NSLOCTEXT("CombatUnit.Basic_Warrior", "Name", "Warrior")    ; FText
+OldNorseName = Verjmaðr    ; FString
+CombatRatingsOverride = None    ; UCombatRatingScoreModifier*
+AISetup = (MaxMovesPerTurn=1,MaxDisengageAttempts=1,PathSelection=IgnoreAlert,DontUseAlertWhenMeleeEnemyInAttackRange=True,MaximumEnemyRangeToUseAlert=6,EngagePowerBalanceOffset=250,DisengagePowerBalanceOffset=100,EngagePowerBalanceFactor=5)    ; FAISetup
+bIsBoss = False    ; bool
+InitialExecutionChance = 0    ; uint8
+Events =     ; TArray
+IgnoreWeaponStats = True    ; bool
+IgnoreWeaponAbilites = True    ; bool
+MainHandSlot = (Asset="/Game/Norse/Core/Data/Items/Weapons/Axes/Tier1_Common_Axe_01.Tier1_Common_Axe_01",Crit=False,BonusStat=Unspecified)    ; FSetupItemAsset_Weapon
+OffhandSlot = (Asset=None,Crit=False,BonusStat=Unspecified)    ; FSetupItemAsset_Weapon
+AlternativeWeapon = (Asset=None,Crit=False,BonusStat=Unspecified)    ; FSetupItemAsset_Weapon
+UtilityItem =     ; TArray
+CombatRatingScale = 100    ; int32
+NativeClass = /Script/CoreUObject.Class'/Script/Norse.CombatUnit'    ; TSubclassOf<UDataAsset>

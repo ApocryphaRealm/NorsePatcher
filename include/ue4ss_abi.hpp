@@ -1,0 +1,205 @@
+#pragma once
+// ue4ss_abi.hpp - the minimal slice of the UE4SS v4.0.0 C++ API NorsePatcher uses (copied from NorseRealtimeNative 0.5.27, extended), declared to match the EXPORTED
+// symbols of UE4SS.dll exactly (MSVC name mangling), so the mod links against an import library generated from the
+// installed UE4SS.dll (tools\make-importlib.ps1) instead of the full RE-UE4SS source tree.
+//
+// Why: building RE-UE4SS's own headers needs its private UEPseudo submodule (Epic-account-gated GitHub access).
+// Every declaration below mirrors a public header of RE-UE4SS v4.0.0 (commit 30afe5ff, the installed build):
+//   - RC::CppUserModBase: UE4SS/include/Mod/CppUserModBase.hpp (layout AND virtual order copied verbatim - MSVC
+//     orders overloaded virtuals by declaration, so the declarations must stay in this exact order).
+//   - RC::Unreal::*: signatures read from the UE4SS.dll export table (dumpbin /exports).
+// A wrong signature here fails at LINK time (unresolved external), never silently at runtime - that is the point of
+// linking against the generated import library rather than resolving by GetProcAddress.
+//
+// Rule: never add a data member, a virtual, or reorder anything in CppUserModBase without re-reading the header of the
+// exact UE4SS version installed.
+
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#define NRN_UE4SS_IMPORT __declspec(dllimport)
+
+namespace RC
+{
+    using StringType = std::wstring;
+    using StringViewType = std::wstring_view;
+
+    namespace GUI
+    {
+        class GUITab;
+    }
+    namespace LuaMadeSimple
+    {
+        class Lua;
+    }
+
+    class CppUserModBase
+    {
+      protected:
+        std::vector<std::shared_ptr<GUI::GUITab>> GUITabs{};
+
+      public:
+        StringType ModName{};
+        StringType ModVersion{};
+        StringType ModDescription{};
+        StringType ModAuthors{};
+        StringType ModIntendedSDKVersion{};
+
+      public:
+        NRN_UE4SS_IMPORT CppUserModBase();
+        NRN_UE4SS_IMPORT virtual ~CppUserModBase();
+
+      public:
+        virtual auto on_update() -> void {}
+        virtual auto on_unreal_init() -> void {}
+        virtual auto on_ui_init() -> void {}
+        virtual auto on_program_start() -> void {}
+        virtual auto on_lua_start(StringViewType, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, std::vector<LuaMadeSimple::Lua*>&) -> void {}
+        virtual auto on_lua_start(LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, std::vector<LuaMadeSimple::Lua*>&) -> void {}
+        virtual auto on_lua_stop(StringViewType, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, std::vector<LuaMadeSimple::Lua*>&) -> void {}
+        virtual auto on_lua_stop(LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, std::vector<LuaMadeSimple::Lua*>&) -> void {}
+        virtual auto on_dll_load(StringViewType) -> void {}
+        virtual auto render_tab() -> void {}
+        virtual auto on_lua_start(StringViewType, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua*) -> void {}
+        virtual auto on_lua_start(LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua*) -> void {}
+        virtual auto on_lua_stop(StringViewType, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua*) -> void {}
+        virtual auto on_lua_stop(LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&, LuaMadeSimple::Lua*) -> void {}
+        virtual auto on_cpp_mods_loaded() -> void {}
+    };
+
+    namespace Unreal
+    {
+        class UClass;
+        class UFunction;
+        class UEngine;
+        class AGameModeBase;
+        class FOutputDevice;
+        class FProperty;
+
+        // RC::Unreal::EFindName / FName (0.4.0): only the exported constructor
+        // ??0FName@Unreal@RC@@QEAA@PEB_WW4EFindName@12@PEAX@Z is used. The class is declared with a large tail so a
+        // caller's storage is never smaller than UE4SS's own FName; the engine value is the first 8 bytes
+        // (ComparisonIndex, Number).
+        enum EFindName
+        {
+            FNAME_Find,
+            FNAME_Add
+        };
+        class FName
+        {
+          public:
+            NRN_UE4SS_IMPORT FName(const wchar_t* StrName, EFindName FindType = FNAME_Add, void* FunctionAddressOverride = nullptr);
+            // ?ToString@FName@Unreal@RC@@QEAA?AV?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@XZ (NorsePatcher)
+            NRN_UE4SS_IMPORT std::wstring ToString();
+            uint32_t ComparisonIndex;
+            uint32_t Number;
+            uint8_t Reserve[48];
+        };
+
+        class UObjectBase
+        {
+          public:
+            NRN_UE4SS_IMPORT UClass*& GetClassPrivate();
+        };
+
+        class UObject : public UObjectBase
+        {
+          public:
+            NRN_UE4SS_IMPORT UFunction* GetFunctionByNameInChain(const wchar_t* ShortFunctionName);
+            NRN_UE4SS_IMPORT void ProcessEvent(UFunction* Function, void* Parms);
+            NRN_UE4SS_IMPORT void* GetValuePtrByPropertyNameInChain(const wchar_t* PropertyName);
+            NRN_UE4SS_IMPORT std::wstring GetFullName(UObject* StopOuter = nullptr) const;
+        };
+
+        class UFunction
+        {
+          public:
+            NRN_UE4SS_IMPORT uint16_t& GetParmsSize();
+        };
+
+        // ---- NorsePatcher 0.1.0: the reflection slice (property walk, text import/export). Each member is an export of
+        // UE4SS.dll v4.0.0 (build\ue4ss\UE4SS.def); the mangled name is in the comment. Nothing here takes an FName by
+        // value: this header cannot promise UE4SS's FName size, so by-value FName functions are never declared.
+        class FString
+        {
+          public:
+            NRN_UE4SS_IMPORT FString();  // ??0FString@Unreal@RC@@QEAA@XZ
+            NRN_UE4SS_IMPORT ~FString(); // ??1FString@Unreal@RC@@QEAA@XZ
+            FString(const FString&) = delete;
+            FString& operator=(const FString&) = delete;
+            const wchar_t* c_str() const { return (Data && Num > 0) ? Data : L""; }
+            wchar_t* Data = nullptr; // TArray<TCHAR>: allocation, Num (with the terminator), Max
+            int32_t Num = 0;
+            int32_t Max = 0;
+            uint8_t Reserve[16]{}; // headroom in case UE4SS's FString is larger than the engine's 16 bytes
+        };
+
+        class FField
+        {
+          public:
+            // ?GetName@FField@Unreal@RC@@QEBA?AV?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@XZ
+            NRN_UE4SS_IMPORT std::wstring GetName() const;
+
+          private:
+            // ?GetNext@FField@Unreal@RC@@AEBAAEAPEBV123@XZ - private in UE4SS, reached through FieldWalk
+            NRN_UE4SS_IMPORT const FField*& GetNext() const;
+            friend struct FieldWalk;
+        };
+
+        class FProperty : public FField
+        {
+          public:
+            NRN_UE4SS_IMPORT const int32_t& GetOffset_Internal() const; // ?GetOffset_Internal@FProperty@Unreal@RC@@QEBAAEBHXZ
+            NRN_UE4SS_IMPORT int32_t GetSize() const;                   // ?GetSize@FProperty@Unreal@RC@@QEBAHXZ
+            // ?GetCPPType@FProperty@Unreal@RC@@QEBA?AVFString@23@PEAV423@I@Z
+            NRN_UE4SS_IMPORT FString GetCPPType(FString* ExtendedTypeText, uint32_t CPPExportFlags) const;
+            // ?ImportText_Direct@FProperty@Unreal@RC@@QEBAPEB_WPEB_WPEAXPEAVUObject@23@HPEAVFOutputDevice@23@@Z
+            NRN_UE4SS_IMPORT const wchar_t* ImportText_Direct(const wchar_t* Buffer, void* PropertyPtr, UObject* OwnerObject, int32_t PortFlags,
+                                                              FOutputDevice* ErrorText) const;
+            // ?ExportText_Direct@FProperty@Unreal@RC@@QEAA_NAEAVFString@23@PEBX1PEAVUObject@23@H2@Z
+            NRN_UE4SS_IMPORT bool ExportText_Direct(FString& ValueStr, const void* Data, const void* Delta, UObject* Parent, int32_t PortFlags,
+                                                    UObject* ExportRootScope);
+        };
+
+        struct FieldWalk
+        {
+            static const FField* Next(const FField* f) { return f ? f->GetNext() : nullptr; }
+        };
+
+        class UStruct : public UObject
+        {
+          public:
+            NRN_UE4SS_IMPORT FField*& GetChildProperties();         // ?GetChildProperties@UStruct@Unreal@RC@@QEAAAEAPEAVFField@23@XZ
+            NRN_UE4SS_IMPORT UStruct* GetInheritanceSuper() const;  // ?GetInheritanceSuper@UStruct@Unreal@RC@@QEBAPEAV123@XZ
+        };
+
+        class UClass : public UStruct
+        {
+        };
+
+        class FMemory
+        {
+          public:
+            NRN_UE4SS_IMPORT static void Free(void* Original); // ?Free@FMemory@Unreal@RC@@SAXPEAX@Z
+        };
+
+        namespace UObjectGlobals
+        {
+            NRN_UE4SS_IMPORT UObject* FindFirstOf(const wchar_t* ClassName);
+            NRN_UE4SS_IMPORT void FindAllOf(const wchar_t* ClassName, std::vector<UObject*>& OutStorage);
+            NRN_UE4SS_IMPORT UObject* StaticFindObject_InternalSlow(UClass* ObjectClass, UObject* InObjectPackage, const wchar_t* OrigInName, bool bExactClass);
+        } // namespace UObjectGlobals
+
+        namespace Hook
+        {
+            NRN_UE4SS_IMPORT void RegisterEngineTickPreCallback(std::function<void(UEngine*, float)>);
+            NRN_UE4SS_IMPORT void RegisterProcessConsoleExecCallback(std::function<bool(UObject*, const wchar_t*, FOutputDevice&, UObject*)>);
+            NRN_UE4SS_IMPORT void RegisterInitGameStatePostCallback(std::function<void(AGameModeBase*)>);
+        } // namespace Hook
+    } // namespace Unreal
+} // namespace RC

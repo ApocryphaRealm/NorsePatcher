@@ -1,0 +1,80 @@
+# NorsePatcher dump of DataTable /Game/Norse/Core/Data/Tables/DT_Stats.DT_Stats
+# data table, row struct ScriptStruct /Script/Norse.GraphicDescription, 13 rows. Patch as <Row>.<Field> = value
+
+EStat::Health
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_Health_01.T_Atribute_Health_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Health_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Health_Name")    ; FText
+
+EStat::Armor
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_Armor_01.T_Atribute_Armor_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Armor_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Armor_Name")    ; FText
+
+EStat::Reflex
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_Reflex_01.T_Atribute_Reflex_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Reflex_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Reflex_Name")    ; FText
+
+EStat::Damage
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_WeaponDamage_01.T_Atribute_WeaponDamage_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Damage_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Damage_Name")    ; FText
+
+EStat::Range
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_Range_01.T_Atribute_Range_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Range_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Range_Name")    ; FText
+
+EStat::Movement
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_Mobility_01.T_Atribute_Mobility_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Mobility_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Mobility_Name")    ; FText
+
+EStat::Skill
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_Skill_03.T_Atribute_Skill_03'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Skill_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Skill_Name")    ; FText
+
+EStat::CritDamage
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_CriticalDamage_01.T_Atribute_CriticalDamage_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "CriticalDamage_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "CriticalDamage_Name")    ; FText
+
+EStat::CritChance
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_CriticalDamage_01.T_Atribute_CriticalDamage_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "CriticalChance_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "CriticalChance_Name")    ; FText
+
+EStat::ArmorPiercing
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_CriticalChance.T_Atribute_CriticalChance'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "ArmorPiercing_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "ArmorPiercing_Name")    ; FText
+
+EStat::ArmorBreak
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_ArmorBreak_01.T_Atribute_ArmorBreak_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "ArmorBreak_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "ArmorBreak_Name")    ; FText
+
+EStat::Ability
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/Attributes/T_Atribute_ActionPoints_01.T_Atribute_ActionPoints_01'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "AbilityPoint_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "AbilityPoint_Name")    ; FText
+
+EStat::Stability
+    Icon = /Script/Engine.Texture2D'/Game/Norse/UI/Assets/Icons/StatusEffects/T_StatusEffect_Anchored.T_StatusEffect_Anchored'    ; UTexture2D*
+    Description = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Stability_Description")    ; FText
+    TooltipParameters =     ; TArray
+    BaseName = LOCTABLE("/Game/Norse/Core/Data/LocalizationStringTables/Stats.Stats", "Stability_Name")    ; FText
