@@ -106,6 +106,26 @@ namespace
 
     // Loads an asset by object path (already loaded: found directly). KismetSystemLibrary MakeSoftObjectPath ->
     // Conv_SoftObjPathToSoftObjRef -> LoadAsset_Blocking, as in NorseRealtimeNative 0.5.x.
+    UObject* LoadByPath(const wchar_t* path);
+
+    // Load an asset a rule puts into the game's data, and keep it loaded: the object that will refer to it may be a
+    // start-up asset outside garbage-collection tracking, whose reference would not keep it alive (NorseSound 0.1.0).
+    UObject* LoadKept(const wchar_t* path)
+    {
+        UObject* o = LoadByPath(path);
+        if (o)
+        {
+            try
+            {
+                if (!o->IsRootSet()) o->SetRootSet();
+            }
+            catch (...)
+            {
+            }
+        }
+        return o;
+    }
+
     UObject* LoadByPath(const wchar_t* path)
     {
         if (UObject* o = FindObj(path)) return o;

@@ -115,6 +115,11 @@ namespace RC
             NRN_UE4SS_IMPORT void ProcessEvent(UFunction* Function, void* Parms);
             NRN_UE4SS_IMPORT void* GetValuePtrByPropertyNameInChain(const wchar_t* PropertyName);
             NRN_UE4SS_IMPORT std::wstring GetFullName(UObject* StopOuter = nullptr) const;
+            // Keep an object alive whatever refers to it. An asset loaded at start-up can sit outside garbage-collection
+            // tracking, so its references do not keep a newly loaded object alive (NorseSound 0.1.0: a sound swapped
+            // into an audio event was collected at the next map change and the event's field read as freed memory).
+            NRN_UE4SS_IMPORT void SetRootSet(); // ?SetRootSet@UObject@Unreal@RC@@QEAAXXZ
+            NRN_UE4SS_IMPORT bool IsRootSet();  // ?IsRootSet@UObject@Unreal@RC@@QEAA_NXZ
         };
 
         class UFunction
