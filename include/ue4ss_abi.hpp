@@ -200,6 +200,8 @@ namespace RC
             NRN_UE4SS_IMPORT void RegisterEngineTickPreCallback(std::function<void(UEngine*, float)>);
             NRN_UE4SS_IMPORT void RegisterProcessConsoleExecCallback(std::function<bool(UObject*, const wchar_t*, FOutputDevice&, UObject*)>);
             NRN_UE4SS_IMPORT void RegisterInitGameStatePostCallback(std::function<void(AGameModeBase*)>);
+            // NorseHUD: runs after every ProcessEvent, also for a Blueprint event nothing implements (ReceiveDrawHUD)
+            NRN_UE4SS_IMPORT void RegisterProcessEventPostCallback(std::function<void(UObject*, UFunction*, void*)>);
         } // namespace Hook
     } // namespace Unreal
 } // namespace RC
