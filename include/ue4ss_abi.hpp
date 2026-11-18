@@ -182,6 +182,28 @@ namespace RC
         {
         };
 
+        // NorseLoot (2026-11-17): reaching lists nested in structs and other lists
+        template <typename T>
+        class TObjectPtr
+        {
+          public:
+            T* Ptr;
+        };
+        class UScriptStruct : public UStruct
+        {
+        };
+        class FArrayProperty : public FProperty
+        {
+          public:
+            NRN_UE4SS_IMPORT FProperty*& GetInner(); // ?GetInner@FArrayProperty@Unreal@RC@@QEAAAEAPEAVFProperty@23@XZ
+        };
+        class FStructProperty : public FProperty
+        {
+          public:
+            // ?GetStruct@FStructProperty@Unreal@RC@@QEAAAEAV?$TObjectPtr@VUScriptStruct@Unreal@RC@@@23@XZ
+            NRN_UE4SS_IMPORT TObjectPtr<UScriptStruct>& GetStruct();
+        };
+
         class FMemory
         {
           public:

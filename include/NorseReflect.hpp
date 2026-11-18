@@ -87,7 +87,7 @@ namespace
 
     std::wstring ShortName(const std::wstring& path)
     {
-        size_t d = path.find_last_of(L"./");
+        size_t d = path.find_last_of(L"./:"); // ":" too: a sub-object (Asset.Asset:TraderProfile_0) - NorseLoot, 2026-11-17
         return d == std::wstring::npos ? path : path.substr(d + 1);
     }
 
@@ -428,5 +428,129 @@ namespace
         NRN_INFO("np.dump: %s -> %s (%zu fields)", Narrow(path).c_str(), Narrow(file.wstring()).c_str(), count);
     }
 
+    // ------------------------------------------------------------------ nested lists (NorseLoot, 2026-11-17)
+    // A path into an object: Field, Field.Sub, List[2], List[*] (every element). ResolveArrays returns every TArray the
+    // path ends on: e.g. "Tiers[*].ItemPools[*].Items" on a TraderProfile -> each pool's item list. A step whose type is
+    // not what the path needs ends that branch with a log line; nothing is written here.
+    struct ArrayAt
+    {
+        FProperty* prop = nullptr; // the TArray property
+        uint8_t* addr = nullptr;   // its value
+        std::string label;         // the path with the indexes taken
+    };
+
+    bool IsStructType(const std::wstring& cpp)
+    {
+        return cpp.size() > 1 && cpp[0] == L'F' && cpp != L"FString" && cpp != L"FName" && cpp != L"FText";
+    }
+
+    void ResolveSteps(UStruct* s, uint8_t* base, const std::vector<std::wstring>& steps, size_t i, const std::string& label,
+                      std::vector<ArrayAt>& out)
+    {
+        std::wstring step = steps[i], name = step, sel;
+        size_t lb = step.find(L'[');
+        if (lb != std::wstring::npos && step.back() == L']')
+        {
+            name = step.substr(0, lb);
+            sel = step.substr(lb + 1, step.size() - lb - 2);
+        }
+        FProperty* p = FindProp(s, name);
+        if (!p)
+        {
+            NRN_WARN("path: no field '%s' at %s", Narrow(name).c_str(), label.empty() ? "the object" : label.c_str());
+            return;
+        }
+        uint8_t* addr = base + p->GetOffset_Internal();
+        std::wstring cpp = CppType(p);
+        std::string here = label + (label.empty() ? "" : ".") + Narrow(name);
+        bool last = i + 1 == steps.size();
+        if (cpp.rfind(L"TArray", 0) == 0)
+        {
+            if (last && sel.empty())
+            {
+                out.push_back({p, addr, here});
+                return;
+            }
+            if (sel.empty())
+            {
+                NRN_WARN("path: %s is a list - write %s[*] or %s[n] to go inside it", here.c_str(), Narrow(name).c_str(), Narrow(name).c_str());
+                return;
+            }
+            auto* inner = static_cast<RC::Unreal::FArrayProperty*>(p)->GetInner();
+            if (!inner || !IsStructType(CppType(inner)))
+            {
+                NRN_WARN("path: %s holds no structs - it can only be the last step", here.c_str());
+                return;
+            }
+            UStruct* es = static_cast<RC::Unreal::FStructProperty*>(inner)->GetStruct().Ptr;
+            size_t esize = static_cast<size_t>(inner->GetSize());
+            struct FScriptArray
+            {
+                uint8_t* data;
+                int32_t num, max;
+            };
+            auto* arr = reinterpret_cast<FScriptArray*>(addr);
+            if (!es || !esize || arr->num < 0 || arr->num > 100000 || (arr->num && !arr->data)) return;
+            for (int32_t k = 0; k < arr->num; ++k)
+            {
+                if (sel != L"*" && _wtoi(sel.c_str()) != k) continue;
+                if (last) continue; // List[n] as the last step names an element, not a list - not supported
+                ResolveSteps(es, arr->data + static_cast<size_t>(k) * esize, steps, i + 1, here + "[" + std::to_string(k) + "]", out);
+            }
+            return;
+        }
+        if (last)
+        {
+            NRN_WARN("path: %s is a %s, not a list", here.c_str(), Narrow(cpp).c_str());
+            return;
+        }
+        if (!IsStructType(cpp))
+        {
+            NRN_WARN("path: %s is a %s - a path can only go into structs and lists", here.c_str(), Narrow(cpp).c_str());
+            return;
+        }
+        UStruct* ss = static_cast<RC::Unreal::FStructProperty*>(p)->GetStruct().Ptr;
+        if (ss) ResolveSteps(ss, addr, steps, i + 1, here, out);
+    }
+
+    std::vector<ArrayAt> ResolveArrays(UObject* obj, const std::wstring& path)
+    {
+        std::vector<ArrayAt> out;
+        auto* cls = reinterpret_cast<UStruct*>(Reflect::Get().ClassOf(obj));
+        std::vector<std::wstring> steps;
+        std::wstringstream ss(path);
+        std::wstring part;
+        while (std::getline(ss, part, L'.'))
+            if (!Trim(part).empty()) steps.push_back(Trim(part));
+        if (cls && !steps.empty()) ResolveSteps(cls, reinterpret_cast<uint8_t*>(obj), steps, 0, "", out);
+        return out;
+    }
+
+    // Top-level elements of an exported list "(a,b,(c,d))" (moved here from NorseDistributor for NorseLoot).
+    std::vector<std::wstring> ListElements(const std::wstring& arr)
+    {
+        std::vector<std::wstring> out;
+        std::wstring s = Trim(arr);
+        if (s.size() < 2 || s.front() != L'(' || s.back() != L')') return out;
+        s = s.substr(1, s.size() - 2);
+        int depth = 0;
+        bool q = false;
+        std::wstring cur;
+        for (wchar_t c : s)
+        {
+            if (c == L'"') q = !q;
+            if (!q && c == L'(') ++depth;
+            if (!q && c == L')') --depth;
+            if (!q && depth == 0 && c == L',')
+            {
+                out.push_back(Trim(cur));
+                cur.clear();
+                continue;
+            }
+            cur += c;
+        }
+        if (!Trim(cur).empty()) out.push_back(Trim(cur));
+        return out;
+    }
 } // namespace
 } // namespace norse
