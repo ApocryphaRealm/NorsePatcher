@@ -18,6 +18,7 @@ target("main")
     set_kind("shared")
     add_files("src/*.cpp")
     add_includedirs("include")
+    add_includedirs("../NorseManifest/include") -- pack manifests and load order
     add_defines("NP_VERSION=\"" .. version .. "\"")
     add_defines("WIN32_LEAN_AND_MEAN", "NOMINMAX", "UNICODE", "_UNICODE")
     add_cxflags("/EHsc", "/W4", "/permissive-", "/utf-8", {force = true})

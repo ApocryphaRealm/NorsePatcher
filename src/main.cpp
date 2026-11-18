@@ -17,6 +17,7 @@
 #include <Windows.h>
 
 #include "NorseReflect.hpp"
+#include "NorseManifest.hpp"
 
 #include <algorithm>
 #include <cwctype>
@@ -103,9 +104,13 @@ namespace
         if (fs::is_directory(dir, ec))
             for (const auto& f : fs::directory_iterator(dir, ec))
                 if (f.is_regular_file() && Lower(f.path().extension().wstring()) == L".ini") files.push_back(f.path());
-        std::sort(files.begin(), files.end(), [](const fs::path& a, const fs::path& b) {
-            return Lower(a.filename().wstring()) < Lower(b.filename().wstring());
-        });
+        // NorseManifest: files of switched-off packs are skipped; the rest are read in the packs' load order, then by
+        // file name; a file no pack claims is read last (ue4ss\NorsePacks\*.ini, include/NorseManifest.hpp)
+        {
+            nm::Manifest man;
+            man.Resolve(g_mod.parent_path().parent_path());
+            files = man.Arrange(files, [](const std::string& s) { NRN_INFO("load order: %s", s.c_str()); });
+        }
         std::map<std::wstring, std::string> owner; // path|key -> the file that set it first
         size_t edits = 0;
         for (const auto& f : files)
