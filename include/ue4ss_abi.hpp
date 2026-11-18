@@ -210,6 +210,20 @@ namespace RC
             NRN_UE4SS_IMPORT TObjectPtr<UScriptStruct>& GetStruct();
         };
 
+        // UE4SS's FText wrapper: a properly constructed text value to pass to a UFunction (NMMF 0.1.0: importing
+        // INVTEXT(...) into an uninitialised parameter buffer failed every time - TextBlock.SetText never ran).
+        // The storage is generous: UE4SS keeps the engine FText inside (MaxStorageSize), we never read it ourselves.
+        class FText
+        {
+          public:
+            NRN_UE4SS_IMPORT FText(const wchar_t* Str);           // ??0FText@Unreal@RC@@QEAA@PEB_W@Z
+            NRN_UE4SS_IMPORT ~FText();                            // ??1FText@Unreal@RC@@QEAA@XZ
+            NRN_UE4SS_IMPORT void CopyBorrowedTo(void* Dest) const; // ?CopyBorrowedTo@FText@Unreal@RC@@QEBAXPEAX@Z
+            NRN_UE4SS_IMPORT static int StaticSize();             // ?StaticSize@FText@Unreal@RC@@SAHXZ
+          private:
+            alignas(16) uint8_t m_storage[256]{};
+        };
+
         // An object's slot in the global object array (NorseHUD 0.1.1: a unit destroyed between refreshes)
         struct FUObjectItem
         {
