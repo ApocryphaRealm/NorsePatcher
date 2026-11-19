@@ -4,7 +4,7 @@ Runtime data patching for NORSE: Oath of Blood - a UE4SS v4.0.0 C++ mod. Plain-t
 rows, data assets and class defaults while the game runs. The game's paks are never edited: remove a patch file and the
 original values are back at the next start.
 
-It is the first of the framework layer in `4. plans\norse-realtime-combat-20261116\ASSESSMENT-AND-PLAN.md`
+It is the first of the framework layer in the Norse overhaul plan
 ("NorsePatcher (SkyPatcher-like)"). Prior art checked 2026-11-17: Norse has no data-patching mod on Nexus; the closest
 model is PalSchema for Palworld (a UE4SS framework that edits DataTables and Blueprints from JSON, field-level, with live
 reload). NorsePatcher takes its field-level edits and live reload, and SkyPatcher's plain-text, one-line-per-change form.
