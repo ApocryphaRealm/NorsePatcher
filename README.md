@@ -49,3 +49,7 @@ and `patches\` beside it.
 
 Log: `NorsePatcher.log` beside `NorsePatcher.ini` (or `sLogDir`): one line per value set, before -> after, with the
 file and line that set it.
+
+## Licence
+
+GPL-3.0-or-later (see LICENSE).
